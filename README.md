@@ -60,6 +60,7 @@ CalendarTable = CALENDAR(DATE(2022,01,01), DATE(2025,12,31))
 - The three tables (cleaned outage data, site information, and calendar table) were modeled and joined on relevant keys:
   - The outage data was joined to the site information on the "Site ID".
   - The outage data was joined to the calendar table on the "Date".
+![model-image](assets/images/data_model.png)
 
 ### Measure Creation
 
