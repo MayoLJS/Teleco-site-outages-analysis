@@ -60,9 +60,9 @@ CalendarTable = CALENDAR(DATE(2022,01,01), DATE(2025,12,31))
   - The outage data was joined to the site information on the "Site ID".
   - The outage data was joined to the calendar table on the "Date".
 
-## Measure Creation
+### Measure Creation
 
-### Matrix Table Measures
+#### Matrix Table Measures
 
 - **Percentage of Sites with Outages:**
   ```DAX
@@ -79,14 +79,14 @@ CalendarTable = CALENDAR(DATE(2022,01,01), DATE(2025,12,31))
   Total Sites = COUNTROWS(ihs_matrix)
   ```
 
-### Performance Table Measures
+#### Performance Table Measures
 
 - **Days:**
   ```DAX
   Days = COUNTROWS(DISTINCT('ihs_performance'[Date]))
   ```
 
-### Outages Table Measures
+#### Outages Table Measures
 
 - **Average Downtime per Day:**
   ```DAX
