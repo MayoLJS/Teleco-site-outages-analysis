@@ -62,7 +62,7 @@ CalendarTable = CALENDAR(DATE(2022,01,01), DATE(2025,12,31))
   - The outage data was joined to the calendar table on the "Date".
 ![model-image](assets/images/data_model.png)
 
-### Measure Creation
+### Measure Creation on Power BI
 
 #### Matrix Table Measures
 
@@ -149,7 +149,7 @@ CalendarTable = CALENDAR(DATE(2022,01,01), DATE(2025,12,31))
   Total Downtime = SUM(ihs_outages[Hours])
   ```
 
-## Data Visualization
+## Data Visualization on Power BI
 
 ### Performance Over Time
 
