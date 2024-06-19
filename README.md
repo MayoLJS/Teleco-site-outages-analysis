@@ -31,7 +31,7 @@ The goal of this project is to analyze and visualize the performance and availab
 
 ### Dataset Acquisition
 
-- A dataset was downloaded containing records of telecommunications site outages, including the availability of each site, measured as a percentage of each day.
+- A dataset was downloaded containing records of telecommunications site outages, including the availability of each site, measured as a percentage of each day. [Datasets](assets/datasets)
 
 ### Data Cleaning
 
