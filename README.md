@@ -1,7 +1,7 @@
 
 # Telecommunications Site Outages Analysis and Reporting
 
-![telco-image](assets/images/powerbi_dashboard.jpeg)
+![telco-image](assets/images/powerbi_dashboard.png)
 
 ## Table of contents
 
