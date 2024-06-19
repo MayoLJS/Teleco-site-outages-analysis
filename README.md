@@ -35,8 +35,9 @@ The goal of this project is to analyze and visualize the performance and availab
 
 ### Data Cleaning
 
-- The raw outage data was loaded into a Pandas DataFrame for cleaning, which involved handling missing values, correcting data types, and removing any inconsistencies.![notebook-link](assets/performance and outage EDA and Cleaning.ipynb)
+- The raw outage data was loaded into a Pandas DataFrame for cleaning, which involved handling missing values, correcting data types, and removing any inconsistencies. [Notebook Link](assets/performance%20and%20outage%20EDA%20and%20Cleaning.ipynb)
 - The cleaned data was then exported as a CSV file for further analysis.
+
 
 ## Data Integration and Modeling in Power BI
 
