@@ -2,6 +2,7 @@
 # Telecommunications Site Outages Analysis and Reporting
 
 ![telco-image](assets/images/powerbi_dashboard.png)
+[Interactive Report](https://app.powerbi.com/view?r=eyJrIjoiMDM4MGJmYTctNDBjZi00ZjE4LWEzY2YtMWMxNjUzMjQwZTNhIiwidCI6ImRmODY3OWNkLWE4MGUtNDVkOC05OWFjLWM4M2VkN2ZmOTVhMCJ9)
 
 ## Table of contents
 
@@ -163,4 +164,4 @@ CalendarTable = CALENDAR(DATE(2022,01,01), DATE(2025,12,31))
 
 ## Conclusion
 
-By integrating outage data with site information and utilizing Power BI's robust modeling and visualization capabilities, this project provides a comprehensive view of telecommunications site performance. The insights gained can be used to improve site reliability, allocate resources more effectively, and address recurring issues in a timely manner. [Interactive Power BI Report](https://app.powerbi.com/view?r=eyJrIjoiMDM4MGJmYTctNDBjZi00ZjE4LWEzY2YtMWMxNjUzMjQwZTNhIiwidCI6ImRmODY3OWNkLWE4MGUtNDVkOC05OWFjLWM4M2VkN2ZmOTVhMCJ9)
+By integrating outage data with site information and utilizing Power BI's robust modeling and visualization capabilities, this project provides a comprehensive view of telecommunications site performance. The insights gained can be used to improve site reliability, allocate resources more effectively, and address recurring issues in a timely manner. [Click here for Interactive Power BI Report](https://app.powerbi.com/view?r=eyJrIjoiMDM4MGJmYTctNDBjZi00ZjE4LWEzY2YtMWMxNjUzMjQwZTNhIiwidCI6ImRmODY3OWNkLWE4MGUtNDVkOC05OWFjLWM4M2VkN2ZmOTVhMCJ9)
