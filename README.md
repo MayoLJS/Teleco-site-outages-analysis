@@ -2,7 +2,7 @@
 # Telecommunications Site Outages Analysis and Reporting
 
 ![telco-image](assets/images/powerbi_dashboard.png)
-[Interactive Report](https://app.powerbi.com/view?r=eyJrIjoiMDM4MGJmYTctNDBjZi00ZjE4LWEzY2YtMWMxNjUzMjQwZTNhIiwidCI6ImRmODY3OWNkLWE4MGUtNDVkOC05OWFjLWM4M2VkN2ZmOTVhMCJ9)
+[Interactive Report](https://app.powerbi.com/view?r=eyJrIjoiOTk0NzY4ODItZjMzOC00NDhiLWI4NGQtZDI3OThhM2E4MmJlIiwidCI6ImRmODY3OWNkLWE4MGUtNDVkOC05OWFjLWM4M2VkN2ZmOTVhMCJ9)  
 
 ## Table of contents
 
