@@ -49,8 +49,8 @@ The goal of this project is to analyze and visualize the performance and availab
 
 ### Creating a Calendar Table
 
-- A calendar table was generated in Power BI to facilitate time-based analysis of the site's performance. This table includes all the necessary dates over the period of analysis. Table is also dynamic, so that end date is always "today"
-- The Year, Quater, Month columns are also created
+  A calendar table was generated in Power BI to facilitate time-based analysis of the site's performance. This table includes all the necessary dates over the period of analysis. Table is also dynamic, so that end date is always "today"
+  The Year, Quater, Month columns are also created
 
 ```DAX
 calender = CALENDAR(DATE(2022,01,01),TODAY())
@@ -87,12 +87,12 @@ Month = CONCATENATE([Month#],[Month Name])
 ![model-image](assets/images/data_model.png)
 
 ### Measure/Column Creations on Cleaned Data
-- This section outlines the measures and columns created on the cleaned data for analysis. The calculations use DAX (Data Analysis Expressions) to derive insights from the data.
+  This section outlines the measures and columns created on the cleaned data for analysis. The calculations use DAX (Data Analysis Expressions) to derive insights from the data.
 
 #### Performance Table
 
 - **Average Performance:**
-- This measure calculates the average performance across all selected filters, providing a quick snapshot of overall performance levels.
+  This measure calculates the average performance across all selected filters, providing a quick snapshot of overall performance levels.
   ```DAX
   average performance = 
   AVERAGE(daily_availability[Performance]
@@ -102,14 +102,14 @@ Month = CONCATENATE([Month#],[Month Name])
 #### Outage Table
 
 - **Total Outages:**
-- This measure counts the total number of outage entries in the outage_report table, giving a summary of all recorded outages.
+  This measure counts the total number of outage entries in the outage_report table, giving a summary of all recorded outages.
   ```DAX
   Total Outages_atc = 
   COUNTROWS(outage_report)
   ```
 
 - **Checking for Repeated Outages:**
-- This measure identifies repeated outages by checking for multiple occurrences of the same outage_code on the same day. It helps in analyzing the frequency of repeated failures due to the same root cause.
+  This measure identifies repeated outages by checking for multiple occurrences of the same outage_code on the same day. It helps in analyzing the frequency of repeated failures due to the same root cause.
   ```DAX
   Repeated Outages_atc = 
   VAR CurrentRowDate = [Alarm Start Time]
@@ -130,14 +130,14 @@ Month = CONCATENATE([Month#],[Month Name])
   ```
 
 - **Total Repeated Outages:**
-- This measure sums up all the repeated outages, providing a total count of how many outages were repeated based on the previous calculation.
+  This measure sums up all the repeated outages, providing a total count of how many outages were repeated based on the previous calculation.
   ```DAX
   Total Repeated Outages atc = 
   SUM(outage_report[Repeated Outages_atc])
   ```
 
 - **Average Downtime:**
-- This measure calculates the average downtime for each outage, providing an average time to repair (MTTR) metric. It converts the total duration from minutes into a more readable format of hours and minutes.
+  This measure calculates the average downtime for each outage, providing an average time to repair (MTTR) metric. It converts the total duration from minutes into a more readable format of hours and minutes.
   ```DAX
   AverageDowntime_atc = 
   VAR TotalMinutes = SUM(outage_report[DURATION]) / [Total Outages_atc]
@@ -155,7 +155,7 @@ Month = CONCATENATE([Month#],[Month Name])
 #### Escalation Matrix
 
 - **Site Count:**
-- This measure counts the total number of sites managed, as listed in the escalation_matrix table, providing a count of all monitored sites.
+  This measure counts the total number of sites managed, as listed in the escalation_matrix table, providing a count of all monitored sites.
   ```DAX
   Site Count_atc = 
   COUNTROWS(escalation_matrix)
