@@ -49,10 +49,33 @@ The goal of this project is to analyze and visualize the performance and availab
 
 ### Creating a Calendar Table
 
-- A calendar table was generated in Power BI to facilitate time-based analysis of the site's performance. This table includes all the necessary dates over the period of analysis.
+- A calendar table was generated in Power BI to facilitate time-based analysis of the site's performance. This table includes all the necessary dates over the period of analysis. Table is also dynamic, so that end date is always "today"
+- The Year, Quater, Month columns are also created
 
 ```DAX
-CalendarTable = CALENDAR(DATE(2022,01,01), DATE(2025,12,31))
+calender = CALENDAR(DATE(2022,01,01),TODAY())
+
+Year = 
+YEAR(calender[Date]
+)
+
+Quarter = 
+"Qtr" & QUARTER(calender[Date])
+
+Month Name = 
+FORMAT(
+    DATE(
+        1,
+        'calender'[Month#],
+        1
+    ),
+    "mmmm"
+)
+
+Month# = 
+FORMAT(MONTH([Date]), "00")
+
+Month = CONCATENATE([Month#],[Month Name])
 ```
 
 ### Data Modeling
@@ -60,100 +83,99 @@ CalendarTable = CALENDAR(DATE(2022,01,01), DATE(2025,12,31))
 - The four tables (cleaned outage and performance data, site information, and calendar table) were modeled and joined on relevant keys:
   - The outage and performance data was joined to the site information on the "Site ID".
   - The outage and performance data was joined to the calendar table on the "Date".
+  - Only "One to Many (1:*)" cardinality is used 
 ![model-image](assets/images/data_model.png)
 
-### Measure Creation on Power BI
+### Measure/Column Creations on Cleaned Data
+- This section outlines the measures and columns created on the cleaned data for analysis. The calculations use DAX (Data Analysis Expressions) to derive insights from the data.
 
-#### Matrix Table Measures
+#### Performance Table
 
-- **Percentage of Sites with Outages:**
+- **Average Performance:**
+- This measure calculates the average performance across all selected filters, providing a quick snapshot of overall performance levels.
   ```DAX
-  Percentage of Sites with Outages = 
-  DIVIDE(
-      [Distinct Sites Count],
-      [Total Sites],
-      0
-  )
+  average performance = 
+  AVERAGE(daily_availability[Performance]
+        )
   ```
 
-- **Total Sites:**
+#### Outage Table
+
+- **Total Outages:**
+- This measure counts the total number of outage entries in the outage_report table, giving a summary of all recorded outages.
   ```DAX
-  Total Sites = COUNTROWS(ihs_matrix)
+  Total Outages_atc = 
+  COUNTROWS(outage_report)
   ```
 
-#### Performance Table Measures
-
-- **Days:**
+- **Checking for Repeated Outages:**
+- This measure identifies repeated outages by checking for multiple occurrences of the same outage_code on the same day. It helps in analyzing the frequency of repeated failures due to the same root cause.
   ```DAX
-  Days = COUNTROWS(DISTINCT('ihs_performance'[Date]))
-  ```
-
-#### Outages Table Measures
-
-- **Average Downtime per Day:**
-  ```DAX
-  Average Downtime per Day = [Total Downtime] / [Days]
-  ```
-
-- **Converted Time:**
-  ```DAX
-  ConvertedTime = 
-  VAR TotalMinutes = [Total Downtime]
-  VAR Hours = INT(TotalMinutes / 60)
-  VAR Minutes = MOD(TotalMinutes, 60)
-  RETURN
-  FORMAT(Hours, "00") & ":" & FORMAT(Minutes, "00")
-  ```
-
-- **Converted Time Average:**
-  ```DAX
-  ConvertedTime Average = 
-  VAR TotalMinutes = [Average Downtime per Day]
-  RETURN
-  FORMAT(TIME(TotalMinutes/60, MOD(TotalMinutes, 60), 0), "hh:mm")
-  ```
-
-- **Distinct Sites Count:**
-  ```DAX
-  Distinct Sites Count = 
-  CALCULATE(
-      DISTINCTCOUNT('ihs_matrix'[IHS ID]),
-      FILTER(
-          'ihs_outages',
-          RELATED('ihs_matrix'[IHS ID]) <> BLANK() &&
-          ihs_outages[Day] >= MIN('CalendarTable'[Date]) &&
-          ihs_outages[Day] <= MAX('CalendarTable'[Date])
-      )
-  )
-  ```
-
-- **Repeated Outages on Same Day:**
-  ```DAX
-  Repeated Outages on Same Day = 
-  VAR CurrentRowDate = [Day]
-  VAR CurrentRepeatedOutage = [Repeated Outages]
+  Repeated Outages_atc = 
+  VAR CurrentRowDate = [Alarm Start Time]
+  VAR CurrentRepeatedOutage = [outage_code]
   VAR SameDayOccurrences =
       CALCULATE(
-          COUNTROWS('ihs_outages'),
+          COUNTROWS('outage_report'),
           FILTER(
-              'ihs_outages',
-              [Day] = CurrentRowDate && [Repeated Outages] = CurrentRepeatedOutage
+              'outage_report',
+              YEAR([Alarm Start Time]) = YEAR(CurrentRowDate) &&
+              MONTH([Alarm Start Time]) = MONTH(CurrentRowDate) &&
+              DAY([Alarm Start Time]) = DAY(CurrentRowDate) &&
+              [outage_code] = CurrentRepeatedOutage
           )
       )
   RETURN
       IF(SameDayOccurrences > 1, 1, 0)
   ```
 
-- **Total Downtime:**
+- **Total Repeated Outages:**
+- This measure sums up all the repeated outages, providing a total count of how many outages were repeated based on the previous calculation.
   ```DAX
-  Total Downtime = SUM(ihs_outages[Hours])
+  Total Repeated Outages atc = 
+  SUM(outage_report[Repeated Outages_atc])
   ```
+
+- **Average Downtime:**
+- This measure calculates the average downtime for each outage, providing an average time to repair (MTTR) metric. It converts the total duration from minutes into a more readable format of hours and minutes.
+  ```DAX
+  AverageDowntime_atc = 
+  VAR TotalMinutes = SUM(outage_report[DURATION]) / [Total Outages_atc]
+  VAR RoundedMinutes = ROUND(TotalMinutes, 0)
+  VAR Hours = INT(RoundedMinutes / 60)
+  VAR Minutes = MOD(RoundedMinutes, 60)
+  RETURN
+  IF(
+      Minutes < 10, 
+      Hours & ":0" & Minutes, 
+      Hours & ":" & Minutes
+  )
+  ```
+
+#### Escalation Matrix
+
+- **Site Count:**
+- This measure counts the total number of sites managed, as listed in the escalation_matrix table, providing a count of all monitored sites.
+  ```DAX
+  Site Count_atc = 
+  COUNTROWS(escalation_matrix)
+  ```
+
+### Additional notes
+- Average Performance: Helps quickly gauge the overall performance based on selected filters, allowing for immediate insights into performance trends.
+- Total Outages: Useful for understanding the frequency and volume of outages, essential for operational and performance analysis.
+- Checking for Repeated Outages: This measure is crucial for identifying systemic issues or recurring problems that may need attention.
+- Total Repeated Outages: Summarizes repeated outages to help quantify the impact of recurring issues.
+- Average Downtime: Provides a clear view of the average time to repair, which is essential for assessing maintenance efficiency and responsiveness.
+- Site Count: Offers a straightforward count of the sites being managed, which can be useful for capacity planning and resource allocation.
+
 
 ## Data Visualization on Power BI
 
 ### Performance Over Time
 
-- A line chart was used to visualize site performance over time, showing trends in availability and outage occurrences.
+- A line chart was used to visualize site performance over time, showing trends in availability, A constant line is also included to show target
+- A clustered bar chart is used to show outages in compparison to repeated outages over same period
 
 ### Regional Performance
 
