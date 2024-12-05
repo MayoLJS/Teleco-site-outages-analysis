@@ -2,7 +2,7 @@
 # Telecommunications Site Outages Analysis and Reporting
 
 ![telco-image](assets/images/powerbi_dashboard.png)
-[Interactive Report](https://app.powerbi.com/view?r=eyJrIjoiOTk0NzY4ODItZjMzOC00NDhiLWI4NGQtZDI3OThhM2E4MmJlIiwidCI6ImRmODY3OWNkLWE4MGUtNDVkOC05OWFjLWM4M2VkN2ZmOTVhMCJ9)  
+[Interactive Report](https://app.powerbi.com/view?r=eyJrIjoiNjNlMjY5MDctMmRlNC00NjdhLWIyMDMtOGQ3MWE5ZDkyM2Q4IiwidCI6ImRmODY3OWNkLWE4MGUtNDVkOC05OWFjLWM4M2VkN2ZmOTVhMCJ9)  
 
 ## Table of contents
 
@@ -83,82 +83,78 @@ Month = CONCATENATE([Month#],[Month Name])
 - The four tables (cleaned outage and performance data, site information, and calendar table) were modeled and joined on relevant keys:
   - The outage and performance data was joined to the site information on the "Site ID".
   - The outage and performance data was joined to the calendar table on the "Date".
-  - Only "One to Many (1:*)" cardinality is used 
+  - Only "One to Many (1:*)" cardinality is used
+  - A Repeated Outages table was also created
+```DAX
+atc_repeated outage = 
+SUMMARIZE(
+    atc_outages,
+    atc_outages[incident date],
+    atc_outages[Airtel Site ID], 
+    atc_outages[Sub-Cat 1],
+    atc_outages[Sub-Cat 2], 
+    "Site Count", COUNT(atc_outages[Airtel Site ID])
+)
+```
 ![model-image](assets/images/data_model.png)
 
 ### Measure/Column Creations on Cleaned Data
   This section outlines the measures and columns created on the cleaned data for analysis. The calculations use DAX (Data Analysis Expressions) to derive insights from the data.
 
-#### Performance Table
-
 - **Average Performance:**
   This measure calculates the average performance across all selected filters, providing a quick snapshot of overall performance levels.
-  ```DAX
-  average performance = 
-  AVERAGE(daily_availability[Performance]
-        )
-  ```
-
-#### Outage Table
-
-- **Total Outages:**
-  This measure counts the total number of outage entries in the outage_report table, giving a summary of all recorded outages.
-  ```DAX
-  Total Outages_atc = 
-  COUNTROWS(outage_report)
-  ```
-
-- **Checking for Repeated Outages:**
-  This measure identifies repeated outages by checking for multiple occurrences of the same outage_code on the same day. It helps in analyzing the frequency of repeated failures due to the same root cause.
-  ```DAX
-  Repeated Outages_atc = 
-  VAR CurrentRowDate = [Alarm Start Time]
-  VAR CurrentRepeatedOutage = [outage_code]
-  VAR SameDayOccurrences =
-      CALCULATE(
-          COUNTROWS('outage_report'),
-          FILTER(
-              'outage_report',
-              YEAR([Alarm Start Time]) = YEAR(CurrentRowDate) &&
-              MONTH([Alarm Start Time]) = MONTH(CurrentRowDate) &&
-              DAY([Alarm Start Time]) = DAY(CurrentRowDate) &&
-              [outage_code] = CurrentRepeatedOutage
-          )
-      )
-  RETURN
-      IF(SameDayOccurrences > 1, 1, 0)
-  ```
-
-- **Total Repeated Outages:**
-  This measure sums up all the repeated outages, providing a total count of how many outages were repeated based on the previous calculation.
-  ```DAX
-  Total Repeated Outages atc = 
-  SUM(outage_report[Repeated Outages_atc])
-  ```
+```DAX
+average performance atc = 
+AVERAGE(atc_performance[Performance])
+```
 
 - **Average Downtime:**
-  This measure calculates the average downtime for each outage, providing an average time to repair (MTTR) metric. It converts the total duration from minutes into a more readable format of hours and minutes.
-  ```DAX
-  AverageDowntime_atc = 
-  VAR TotalMinutes = SUM(outage_report[DURATION]) / [Total Outages_atc]
-  VAR RoundedMinutes = ROUND(TotalMinutes, 0)
-  VAR Hours = INT(RoundedMinutes / 60)
-  VAR Minutes = MOD(RoundedMinutes, 60)
-  RETURN
-  IF(
-      Minutes < 10, 
-      Hours & ":0" & Minutes, 
-      Hours & ":" & Minutes
-  )
+  This measure calculates average downtime by converting total outage minutes into formatted hours and minutes.
+```DAX
+AverageDowntime_atc = 
+VAR TotalMinutes = SUM(atc_outages[DURATION]) / [Total Outages_atc]
+VAR Hours = INT(TotalMinutes / 60)
+VAR Minutes = MOD(ROUND(TotalMinutes, 0), 60)
+RETURN
+Hours & ":" & FORMAT(Minutes, "00")
   ```
 
-#### Escalation Matrix
+- **Dynamic Performance:**
+  This measure dynamically calculates the average performance of the selected ATC records using the AVERAGEX function, ensuring it reflects the context and scope defined by ALLSELECTED.
+```DAX
+  Dynamic PA ATC = 
+AVERAGEX(
+    ALLSELECTED(atc_performance),
+    atc_performance[Performance]
+)
+  ```
 
-- **Site Count:**
-  This measure counts the total number of sites managed, as listed in the escalation_matrix table, providing a count of all monitored sites.
-  ```DAX
-  Site Count_atc = 
-  COUNTROWS(escalation_matrix)
+- **Latest Performance:**
+  This measure calculates the average performance for the most recent date in the atc_performance table using the average performance atc measure. It finds the latest date and applies the average calculation for that specific date.
+```DAX
+  Latest Date Performance (atc) = 
+CALCULATE(
+    [average performance atc],
+    LASTDATE(atc_performance[Date])
+)
+  ```
+
+- **Worst Sites:**
+  This measure calculates the worst-performing sites by selecting the top 10 sites with the lowest average performance. It uses TOPN to filter the top 10 worst performers in the atc_performance table and applies the average performance atc measure within the current context defined by RankingContext
+```DAX
+Worst Sites = 
+VAR RankingContext = VALUES(atc_matrix[site_id])
+RETURN
+    CALCULATE(
+        [average performance atc],
+        TOPN(10, 
+            ALL(atc_performance[Anchor Tenant]), 
+            [average performance atc], 
+            ASC
+        ),
+        RankingContext
+    )
+
   ```
 
 ### Additional notes
@@ -187,4 +183,4 @@ Month = CONCATENATE([Month#],[Month Name])
 
 ## Conclusion
 
-By integrating outage data with site information and utilizing Power BI's robust modeling and visualization capabilities, this project provides a comprehensive view of telecommunications site performance. The insights gained can be used to improve site reliability, allocate resources more effectively, and address recurring issues in a timely manner. [Click here for Interactive Power BI Report](https://app.powerbi.com/view?r=eyJrIjoiOTk0NzY4ODItZjMzOC00NDhiLWI4NGQtZDI3OThhM2E4MmJlIiwidCI6ImRmODY3OWNkLWE4MGUtNDVkOC05OWFjLWM4M2VkN2ZmOTVhMCJ9)
+By integrating outage data with site information and utilizing Power BI's robust modeling and visualization capabilities, this project provides a comprehensive view of telecommunications site performance. The insights gained can be used to improve site reliability, allocate resources more effectively, and address recurring issues in a timely manner. [Click here for Interactive Power BI Report](https://app.powerbi.com/view?r=eyJrIjoiNjNlMjY5MDctMmRlNC00NjdhLWIyMDMtOGQ3MWE5ZDkyM2Q4IiwidCI6ImRmODY3OWNkLWE4MGUtNDVkOC05OWFjLWM4M2VkN2ZmOTVhMCJ9)
